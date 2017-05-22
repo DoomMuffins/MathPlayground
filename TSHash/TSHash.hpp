@@ -99,12 +99,15 @@ template<size_t Bits>
 class Hash
 {
 public:
-	constexpr explicit Hash(const PARAMETERS<Bits>& parameters) : 
+	using BitVectorType = BIT_VECTOR<Bits>;
+	using ParametersType = PARAMETERS<Bits>;	
+
+	constexpr explicit Hash(const ParametersType& parameters) :
 		m_parameters(parameters),
 		m_state(parameters.initial_state)
 	{}
 
-	Hash(const PARAMETERS<Bits>& parameters, uint8_t* data, size_t size) : 
+	Hash(const ParametersType& parameters, uint8_t* data, size_t size) :
 		Hash(parameters)
 	{
 		update(data, size);
@@ -123,7 +126,7 @@ public:
 		}
 	}
 
-	BIT_VECTOR<Bits> digest() { return m_state; }
+	BitVectorType digest() { return m_state; }
 
 private:
 	void _update_bit(size_t bit)
@@ -134,8 +137,8 @@ private:
 		m_state ^= m_parameters.polynomials[bit];
 	}
 
-	PARAMETERS<Bits> m_parameters;
-	BIT_VECTOR<Bits> m_state;
+	ParametersType m_parameters;
+	BitVectorType m_state;
 };
 
 }
