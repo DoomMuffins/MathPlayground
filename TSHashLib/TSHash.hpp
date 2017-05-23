@@ -25,7 +25,7 @@ uint32_t bit_scan_forward(const BIT_VECTOR<Bits>& v)
 			return static_cast<uint32_t>(set_bit_index + 64 * i);
 		}
 	}
-	return -1;
+	return static_cast<uint32_t>(-1);
 }
 
 template<size_t Bits>
@@ -92,7 +92,7 @@ template<size_t Bits>
 struct PARAMETERS
 {
 	BIT_VECTOR<Bits> initial_state;
-	BIT_VECTOR<Bits> polynomials[2];
+	std::array<BIT_VECTOR<Bits>, 2> polynomials;
 };
 
 template<size_t Bits>
@@ -127,6 +127,7 @@ public:
 	}
 
 	BitVectorType digest() { return m_state; }
+	void reset() { m_state = m_parameters.initial_state; }
 
 private:
 	void _update_bit(size_t bit)
@@ -137,7 +138,7 @@ private:
 		m_state ^= m_parameters.polynomials[bit];
 	}
 
-	ParametersType m_parameters;
+	const ParametersType m_parameters;
 	BitVectorType m_state;
 };
 
