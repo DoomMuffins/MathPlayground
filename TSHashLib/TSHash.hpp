@@ -167,7 +167,7 @@ public:
 		}
 	}
 
-	BitVectorType digest() { return m_state; }
+	BitVectorType digest() const { return m_state; }
 	void reset() { m_state = m_parameters.initial_state; }
 
 private:
