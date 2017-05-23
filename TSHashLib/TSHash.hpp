@@ -29,6 +29,18 @@ uint32_t bit_scan_forward(const BIT_VECTOR<Bits>& v)
 }
 
 template<size_t Bits>
+bool operator == (const BIT_VECTOR<Bits>& lhs, const BIT_VECTOR<Bits>& rhs)
+{
+	return lhs.data == rhs.data;
+}
+
+template<size_t Bits>
+bool operator != (const BIT_VECTOR<Bits>& lhs, const BIT_VECTOR<Bits>& rhs)
+{
+	return !(lhs == rhs);
+}
+
+template<size_t Bits>
 BIT_VECTOR<Bits>& operator >>= (BIT_VECTOR<Bits>& v, uint32_t shift)
 {
 	for (; shift >= 64; shift -= 64)
