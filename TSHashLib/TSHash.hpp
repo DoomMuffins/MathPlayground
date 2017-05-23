@@ -108,6 +108,35 @@ struct PARAMETERS
 };
 
 template<size_t Bits>
+void set_polynomial_tap(BIT_VECTOR<Bits>& vec, size_t term_degree)
+{
+	const size_t tap_bit_index = Bits - term_degree - 1;
+	auto& word = vec.data[tap_bit_index / 64];
+	word |= 1ULL << (tap_bit_index % 64);
+}
+
+template<size_t Bits>
+BIT_VECTOR<Bits> create_polynomial(const size_t* term_degrees, size_t term_degrees_count)
+{
+	BIT_VECTOR<Bits> polynomial{};
+	for (size_t i = 0; i < term_degrees_count; ++i)
+	{
+		set_polynomial_tap(polynomial, term_degrees[i]);
+	}
+
+	// The constant term must always be set to avoid degenerate case
+	set_polynomial_tap(polynomial, 0);
+	
+	return polynomial;
+}
+
+template<size_t Bits>
+BIT_VECTOR<Bits> create_polynomial(std::initializer_list<size_t> term_degrees_list)
+{
+	return create_polynomial<Bits>(term_degrees_list.begin(), term_degrees_list.size());
+}
+
+template<size_t Bits>
 class Hash
 {
 public:

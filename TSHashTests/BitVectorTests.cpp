@@ -108,3 +108,31 @@ TEST_CASE("Bit vector xor operator", "[bitvector]")
 		CHECK(vec1 == expected);
 	}
 }
+
+TEST_CASE("Bit vector polynomial creation", "[bitvector]")
+{
+	SECTION("Single word polynomial")
+	{
+		const auto polynomial = create_polynomial<64>({ 1, 2, 3 });
+		decltype(polynomial) expected{ {0xF000'0000'0000'0000} };
+		CHECK(polynomial == expected);
+	}
+	SECTION("Single word polynomial, highest term degree")
+	{
+		const auto polynomial = create_polynomial<64>({ 63 });
+		decltype(polynomial) expected{ { 0x8000'0000'0000'0001 } };
+		CHECK(polynomial == expected);
+	}
+	SECTION("Multi word polynomial")
+	{
+		const auto polynomial = create_polynomial<128>({ 1, 2, 3 });
+		decltype(polynomial) expected{ { 0, 0xF000'0000'0000'0000 } };
+		CHECK(polynomial == expected);
+	}
+	SECTION("Multi word polynomial, highest term degree")
+	{
+		const auto polynomial = create_polynomial<128>({ 127 });
+		decltype(polynomial) expected{ { 1, 0x8000'0000'0000'0000 } };
+		CHECK(polynomial == expected);
+	}
+}
