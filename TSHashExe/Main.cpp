@@ -2,23 +2,45 @@
 #include <array>
 #include <random>
 #include <iostream>
+#include <memory>
 
 #include "TSHash.hpp"
 
 int main()
 {
 	using TSHash16 = tshash::Hash<16>;
-	TSHash16::ParametersType parameters;
+	const TSHash16::ParametersType parameters{
+		{{0xBEEF}},
+		{{
+			tshash::create_polynomial<16>({ 15, 12, 10 }),
+			tshash::create_polynomial<16>({ 14, 13, 12, 9, 2 }),
+		}}
+	};
+		
+	std::random_device rd;
+	auto gen = std::make_unique<std::mt19937>(rd());
+	std::uniform_int_distribution<uint32_t> dist(std::numeric_limits<uint32_t>::min(), std::numeric_limits<uint32_t>::max());
 
-	parameters.initial_state = { {0xBEEF} };
-	parameters.polynomials[0] = { {(1 << 0) | (1 << 10) | (1 << 12) | (1 << 15)} };
-	parameters.polynomials[1] = { {(1 << 0) | (1 << 2) | (1 << 9) | (1 << 12) | (1 << 13) | (1 << 14)} };
-
+	auto histogram = std::make_unique<uint32_t[]>(1 << 16);
 	TSHash16 hash(parameters);
-	
-	std::array<uint8_t, 10> arr{ 1, 2, 3 };	
-	hash.update(arr.data(), arr.size());
-	
+
+	for (size_t i = 0; i < 10'000'000; ++i)
+	{
+		const uint32_t random_buffer = dist(*gen);
+
+		hash.reset();
+		hash.update(reinterpret_cast<const uint8_t*>(&random_buffer), sizeof(random_buffer));
+		const auto digest = hash.digest();
+
+		if (digest.data[0] >= 1 << 16)
+		{
+			std::cout << "Weird digest!" << std::endl;
+			char c; std::cin >> c;
+		}
+
+		histogram[digest.data[0]] += 1;
+	}
+
 	//std::cout << hash.digest() << std::endl;
 	
     return 0;

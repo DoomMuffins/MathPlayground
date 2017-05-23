@@ -148,13 +148,13 @@ public:
 		m_state(parameters.initial_state)
 	{}
 
-	Hash(const ParametersType& parameters, uint8_t* data, size_t size) :
+	Hash(const ParametersType& parameters, const uint8_t* data, size_t size) :
 		Hash(parameters)
 	{
 		update(data, size);
 	}
 
-	void update(uint8_t* data, size_t size)
+	void update(const uint8_t* data, size_t size)
 	{
 		for (size_t i = 0; i < size; ++i)
 		{
