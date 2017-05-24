@@ -8,10 +8,31 @@
 
 namespace tshash {
 
+// TODO: protect against usages that set more bits than the vector declares to handle?
+
 template<size_t Bits>
 struct BIT_VECTOR
 {
 	std::array<uint64_t, (Bits + 63) / 64> data;
+
+	template<size_t DstBits>
+	explicit operator BIT_VECTOR<DstBits>() const
+	{
+		BIT_VECTOR<DstBits> vec{};
+		
+		constexpr auto total_bits_to_copy = std::min(Bits, DstBits);
+		constexpr auto words_to_copy = total_bits_to_copy / 64;
+		constexpr auto last_bits_to_copy = total_bits_to_copy % 64;
+		
+		std::copy_n(data.begin(), words_to_copy, vec.data.begin());
+		// avoiding "conditional expression is constant" without ugly pragmas
+		if ((void)0, last_bits_to_copy > 0)
+		{
+			vec.data[words_to_copy] = data[words_to_copy] & ((1ULL << last_bits_to_copy % 64) - 1);
+		}		
+		
+		return vec;
+	}
 };
 
 template<size_t Bits>
@@ -108,7 +129,7 @@ struct PARAMETERS
 };
 
 template<size_t Bits>
-void set_polynomial_tap(BIT_VECTOR<Bits>& vec, size_t term_degree)
+void set_polynomial_term(BIT_VECTOR<Bits>& vec, size_t term_degree)
 {
 	const size_t tap_bit_index = Bits - term_degree - 1;
 	auto& word = vec.data[tap_bit_index / 64];
@@ -121,11 +142,11 @@ BIT_VECTOR<Bits> create_polynomial(const size_t* term_degrees, size_t term_degre
 	BIT_VECTOR<Bits> polynomial{};
 	for (size_t i = 0; i < term_degrees_count; ++i)
 	{
-		set_polynomial_tap(polynomial, term_degrees[i]);
+		set_polynomial_term(polynomial, term_degrees[i]);
 	}
 
 	// The constant term must always be set to avoid degenerate case
-	set_polynomial_tap(polynomial, 0);
+	set_polynomial_term(polynomial, 0);
 	
 	return polynomial;
 }
@@ -140,8 +161,9 @@ template<size_t Bits>
 class Hash
 {
 public:
-	using BitVectorType = BIT_VECTOR<Bits>;
-	using ParametersType = PARAMETERS<Bits>;	
+	using DigestType = BIT_VECTOR<Bits>;
+	using BitVectorType = BIT_VECTOR<Bits + 1>;
+	using ParametersType = PARAMETERS<Bits + 1>;	
 
 	constexpr explicit Hash(const ParametersType& parameters) :
 		m_parameters(parameters),
@@ -167,8 +189,10 @@ public:
 		}
 	}
 
-	BitVectorType digest() const { return m_state; }
+	DigestType digest() const { return static_cast<DigestType>(m_state); }
 	void reset() { m_state = m_parameters.initial_state; }
+
+	static BitVectorType create_polynomial(std::initializer_list<size_t> term_degrees_list) { return tshash::create_polynomial<Bits + 1>(term_degrees_list); }
 
 private:
 	void _update_bit(size_t bit)

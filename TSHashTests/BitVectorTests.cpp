@@ -4,6 +4,61 @@
 
 using namespace tshash;
 
+TEST_CASE("Bit vector cast", "[bitvector]")
+{
+	BIT_VECTOR<128> whole{ {0xBEEF'F00D'D00F'FEEB, 0x1234'4321'5678'8765} };
+	BIT_VECTOR<72> partial{ { 0xBEEF'F00D'D00F'FEEB, 0x0000'0000'0000'00FF} };
+
+	SECTION("Widen whole by whole")
+	{
+		const BIT_VECTOR<192> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x1234'4321'5678'8765, 0 } };
+		const auto cast = static_cast<BIT_VECTOR<192>>(whole);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Narrow whole by whole")
+	{
+		const BIT_VECTOR<64> expected{ { 0xBEEF'F00D'D00F'FEEB} };
+		const auto cast = static_cast<BIT_VECTOR<64>>(whole);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Widen whole by partial")
+	{
+		const BIT_VECTOR<150> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x1234'4321'5678'8765, 0} };
+		const auto cast = static_cast<BIT_VECTOR<150>>(whole);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Narrow whole by partial")
+	{
+		const BIT_VECTOR<120> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x0034'4321'5678'8765 } };
+		const auto cast = static_cast<BIT_VECTOR<120>>(whole);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Widen partial by partial")
+	{
+		const BIT_VECTOR<80> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x0000'0000'0000'00FF } };
+		const auto cast = static_cast<BIT_VECTOR<80>>(partial);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Narrow partial by partial")
+	{
+		const BIT_VECTOR<68> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x0000'0000'0000'000F } };
+		const auto cast = static_cast<BIT_VECTOR<68>>(partial);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Widen partial by whole")
+	{
+		const BIT_VECTOR<136> expected{ { 0xBEEF'F00D'D00F'FEEB, 0x0000'0000'0000'00FF, 0} };
+		const auto cast = static_cast<BIT_VECTOR<136>>(partial);
+		REQUIRE(cast == expected);
+	}
+	SECTION("Narrow partial by whole")
+	{
+		const BIT_VECTOR<8> expected{ { 0x0000'0000'0000'00EB} };
+		const auto cast = static_cast<BIT_VECTOR<8>>(partial);
+		REQUIRE(cast == expected);
+	}
+}
+
 TEST_CASE("Bit vector bit_scan_forward", "[bitvector]")
 {
 	SECTION("Single word bit vector BSF")
