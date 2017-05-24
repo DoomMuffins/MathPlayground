@@ -1,5 +1,5 @@
 #include <limits>
-#include "catch.hpp"
+#include "Catch/catch.hpp"
 #include "TSHash.hpp"
 
 using namespace tshash;

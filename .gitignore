@@ -36,6 +36,8 @@
 *.lastbuildstate
 *.idb
 *.enc
+*.ipdb
+*.iobj
 
 # Visual Studio files
 *.VC.db

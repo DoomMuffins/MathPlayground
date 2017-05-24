@@ -65,7 +65,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
+    <ClInclude Include="Catch\catch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TSHashLib\TSHashLib.vcxproj">

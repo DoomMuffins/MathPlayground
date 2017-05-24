@@ -1,11 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="BitVectorTests.cpp" />
     <ClCompile Include="HashTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Catch">
+      <UniqueIdentifier>{48e65fc6-59b4-41f5-8459-1f7df0d9de6c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Catch\catch.hpp">
+      <Filter>Catch</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
