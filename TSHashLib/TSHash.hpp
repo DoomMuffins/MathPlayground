@@ -111,6 +111,24 @@ BIT_VECTOR<Bits> operator ^ (const BIT_VECTOR<Bits>& lhs, const BIT_VECTOR<Bits>
 }
 
 template<size_t Bits>
+BIT_VECTOR<Bits>& operator &= (BIT_VECTOR<Bits>& lhs, const BIT_VECTOR<Bits>& rhs)
+{
+	for (size_t i = 0; i < lhs.data.size(); ++i)
+	{
+		lhs.data[i] &= rhs.data[i];
+	}
+	return lhs;
+}
+
+template<size_t Bits>
+BIT_VECTOR<Bits> operator & (const BIT_VECTOR<Bits>& lhs, const BIT_VECTOR<Bits>& rhs)
+{
+	auto result = lhs;
+	result &= rhs;
+	return result;
+}
+
+template<size_t Bits>
 std::ostream& operator << (std::ostream& os, const BIT_VECTOR<Bits>& v)
 {
 	for (size_t i = v.data.size() - 1; i != 0; --i)
@@ -173,15 +191,24 @@ public:
 	Hash(const ParametersType& parameters, const uint8_t* data, size_t size) :
 		Hash(parameters)
 	{
-		update(data, size);
+		update_bytecount(data, size);
 	}
 
-	void update(const uint8_t* data, size_t size)
+	void update_bytecount(const uint8_t* data, size_t bytecount)
 	{
-		for (size_t i = 0; i < size; ++i)
+		update_bitcount(data, bytecount * CHAR_BIT);
+	}
+
+	void update_bitcount(const uint8_t* data, size_t bitcount)
+	{
+		const size_t bytecount = (bitcount + CHAR_BIT - 1) / CHAR_BIT;
+
+		for (size_t i = 0; i < bytecount; ++i)
 		{
 			uint8_t current_byte = data[i];
-			for (size_t j = 0; j < 8; ++j, current_byte >>= 1)
+			const size_t bits = (i < bytecount - 1) ? CHAR_BIT : (1 + (bitcount - 1) % CHAR_BIT);
+			
+			for (size_t j = 0; j < bits; ++j, current_byte >>= 1)
 			{
 				// TODO: Consider loading m_state to a local
 				_update_bit(current_byte & 1);
