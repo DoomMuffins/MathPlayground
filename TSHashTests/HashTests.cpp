@@ -11,15 +11,15 @@ TEST_CASE("Single word TSHash", "[tshash]")
 	Hash64::ParametersType parameters = {
 		{{0xFFFF'0000'FFFF'0000, 0}},
 		{{
-			Hash64::create_polynomial({64}),
-			Hash64::create_polynomial({63})
+			Hash64::create_polynomial({65}),
+			Hash64::create_polynomial({64})
 		}}
 	};
 	
 	Hash64 hash(parameters);
 	
 	std::array<uint8_t, 1> single_byte_buffer{ 0b1010'1010 };
-	Hash64::DigestType single_byte_buffer_expected{ { 0xFD00007FFF80007D } };
+	Hash64::DigestType single_byte_buffer_expected{ { 0xFA00007FFF80007D } };
 	
 	std::array<uint8_t, 10> multi_byte_buffer{};
 	std::iota(multi_byte_buffer.begin(), multi_byte_buffer.end(), 0x10 - 5);

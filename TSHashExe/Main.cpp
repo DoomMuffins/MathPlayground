@@ -17,8 +17,8 @@ int main()
 	const TSHash16::ParametersType parameters{
 		{{0xBEEF}},
 		{{
-			TSHash16::create_polynomial({ 16, 12, 4 }),
-			TSHash16::create_polynomial({ 13, 8, 6, 5, 2 }),
+			TSHash16::create_polynomial({ 16, 11, 4 }),
+			TSHash16::create_polynomial({ 10, 8, 7, 4, 1 }),
 		}}
 	};
 	
@@ -29,7 +29,7 @@ int main()
 	auto gen = std::make_unique<std::mt19937>(rd());
 	std::uniform_int_distribution<uint32_t> dist(std::numeric_limits<uint32_t>::min(), std::numeric_limits<uint32_t>::max());
 	
-	auto digest_to_src = std::make_unique<std::array<std::vector<uint32_t>, 1 << (Bits - 1)>>();
+	auto digest_to_src = std::make_unique<std::array<std::vector<uint32_t>, (1 << Bits)>>();
 	TSHash16 hash(parameters);
 
 	for (size_t i = 0; i < 10'000'000; ++i)
@@ -39,9 +39,9 @@ int main()
 		hash.reset();
 		hash.update_bytecount(reinterpret_cast<const uint8_t*>(&random_buffer), 4);
 		const auto digest_vector = hash.digest();
-		const auto digest = digest_vector.data[0] >> 1;
+		const auto digest = digest_vector.data[0];
 
-		if (digest >= 1 << (Bits - 1))
+		if (digest >= (1 << Bits))
 		{
 			std::cout << "Weird digest!" << std::endl;
 			char c; std::cin >> c;

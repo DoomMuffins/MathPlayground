@@ -180,8 +180,8 @@ class Hash
 {
 public:
 	using DigestType = BIT_VECTOR<Bits>;
-	using BitVectorType = BIT_VECTOR<Bits + 1>;
-	using ParametersType = PARAMETERS<Bits + 1>;	
+	using BitVectorType = BIT_VECTOR<Bits + 2>;
+	using ParametersType = PARAMETERS<Bits + 2>;	
 
 	constexpr explicit Hash(const ParametersType& parameters) :
 		m_parameters(parameters),
@@ -219,7 +219,7 @@ public:
 	DigestType digest() const { return static_cast<DigestType>(m_state); }
 	void reset() { m_state = m_parameters.initial_state; }
 
-	static BitVectorType create_polynomial(std::initializer_list<size_t> term_degrees_list) { return tshash::create_polynomial<Bits + 1>(term_degrees_list); }
+	static BitVectorType create_polynomial(std::initializer_list<size_t> term_degrees_list) { return tshash::create_polynomial<Bits + 2>(term_degrees_list); }
 
 private:
 	void _update_bit(size_t bit)
