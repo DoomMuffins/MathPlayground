@@ -4,7 +4,11 @@
 #include <cstdint>
 #include <iostream>
 #include <iomanip>
+#include <intrin.h>
 
+#if CHAR_BIT != 8
+#error Sorry, unsupported 
+#endif
 
 namespace tshash {
 
@@ -188,25 +192,19 @@ public:
 		m_state(parameters.initial_state)
 	{}
 
-	Hash(const ParametersType& parameters, const uint8_t* data, size_t size) :
-		Hash(parameters)
-	{
-		update_bytecount(data, size);
-	}
-
 	void update_bytecount(const uint8_t* data, size_t bytecount)
 	{
-		update_bitcount(data, bytecount * CHAR_BIT);
+		update_bitcount(data, 8 * bytecount);
 	}
 
 	void update_bitcount(const uint8_t* data, size_t bitcount)
 	{
-		const size_t bytecount = (bitcount + CHAR_BIT - 1) / CHAR_BIT;
+		const size_t bytecount = (bitcount + 8 - 1) / 8;
 
 		for (size_t i = 0; i < bytecount; ++i)
 		{
 			uint8_t current_byte = data[i];
-			const size_t bits = (i < bytecount - 1) ? CHAR_BIT : (1 + (bitcount - 1) % CHAR_BIT);
+			const size_t bits = (i < bytecount - 1) ? 8 : (1 + (bitcount - 1) % 8);
 			
 			for (size_t j = 0; j < bits; ++j, current_byte >>= 1)
 			{
@@ -219,7 +217,19 @@ public:
 	DigestType digest() const { return static_cast<DigestType>(m_state); }
 	void reset() { m_state = m_parameters.initial_state; }
 
-	static BitVectorType create_polynomial(std::initializer_list<size_t> term_degrees_list) { return tshash::create_polynomial<Bits + 2>(term_degrees_list); }
+	static BitVectorType create_polynomial(std::initializer_list<size_t> monomial_degrees_list) { return tshash::create_polynomial<Bits + 2>(monomial_degrees_list); }
+	static DigestType compute_bytecount(const ParametersType& parameters, const uint8_t* data, size_t bytecount)
+	{
+		Hash hash(parameters);
+		hash.update_bytecount(data, bytecount);
+		return hash.digest();
+	}
+	static DigestType compute_bitcount(const ParametersType& parameters, const uint8_t* data, size_t bitcount)
+	{
+		Hash hash(parameters);
+		hash.update_bitcount(data, bitcount);
+		return hash.digest();
+	}
 
 private:
 	void _update_bit(size_t bit)

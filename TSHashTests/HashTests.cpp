@@ -22,7 +22,7 @@ TEST_CASE("Single word TSHash", "[tshash]")
 	Hash64::DigestType single_byte_buffer_expected{ { 0xFA00007FFF80007D } };
 	
 	std::array<uint8_t, 10> multi_byte_buffer{};
-	std::iota(multi_byte_buffer.begin(), multi_byte_buffer.end(), 0x10 - 5);
+	std::iota(multi_byte_buffer.begin(), multi_byte_buffer.end(), static_cast<uint8_t>(0x10 - 5));
 
 	SECTION("Single update call gives correct result")
 	{
