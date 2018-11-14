@@ -29,17 +29,26 @@ private:
 	time_point m_start;
 };
 
-std::vector<uint8_t> generate_random_buffer(size_t size)
+class RandomBufferGenerator
 {
+private:
 	std::random_device device;
-	std::mt19937 generator(device());
-	std::uniform_int_distribution<uint16_t> byte_dist(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-	const auto get_byte = [&]() { return static_cast<uint8_t>(byte_dist(generator)); };
+	std::mt19937 generator;
+	std::uniform_int_distribution<uint16_t> byte_dist;
 
-	std::vector<uint8_t> buffer(size);
-	std::generate(buffer.begin(), buffer.end(), get_byte);
-	return buffer;
-}
+public:
+	RandomBufferGenerator() : 
+		device(),
+		generator(device()),
+		byte_dist(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max())
+	{}
+
+	void generate(std::vector<uint8_t>& buffer)
+	{
+		const auto get_byte = [&]() { return static_cast<uint8_t>(byte_dist(generator)); };
+		std::generate(buffer.begin(), buffer.end(), get_byte);
+	}
+};
 
 template<class THash>
 void run_benchmark(THash hash, size_t input_size_bits, size_t iterations)
@@ -50,12 +59,15 @@ void run_benchmark(THash hash, size_t input_size_bits, size_t iterations)
 	std::vector<duration> durations;
 	durations.reserve(iterations);
 
-	const auto random_buffer = generate_random_buffer(input_size_bits / 8);
+	RandomBufferGenerator buffer_gen;
+	std::vector<uint8_t> random_buffer(input_size_bits / 8);
 
 	for (size_t i = 0; i < iterations; ++i)
 	{
+		buffer_gen.generate(random_buffer);
 		hash.reset();
 		timer.reset();
+
 		hash.update_bytecount(random_buffer.data(), random_buffer.size());
 		durations.push_back(timer.elapsed());
 	}
